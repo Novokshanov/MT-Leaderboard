@@ -397,21 +397,6 @@ def build_app():
         # State to track colorization status
         colorize_state = gr.State(value=False)
         
-        def update_metrics(benchmark_dir):
-            metrics = get_available_metrics(benchmark_dir)
-            print(f"Available metrics: {metrics}")
-            return gr.Dropdown(choices=metrics, value=None)
-        
-        def update_directions(benchmark_dir):
-            directions = get_available_directions(benchmark_dir)
-            print(f"Available directions: {directions}")
-            return gr.Dropdown(choices=directions)
-        
-        def update_models(benchmark_dir):
-            models = get_available_models(benchmark_dir)
-            print(f"Available models: {models}")
-            return gr.Dropdown(choices=models)
-        
         def update_all_dropdowns(benchmark_dir):
             # Update all dropdowns when a benchmark is selected
             metrics = get_available_metrics(benchmark_dir)
