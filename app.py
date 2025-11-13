@@ -175,33 +175,33 @@ def build_app():
     # Define default score zones for each metric
     default_zones = {
         'BLEU': {
-            'low': {'threshold': 10, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 20, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 15, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 25, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         },
         'chrF': {
-            'low': {'threshold': 0.3, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 0.5, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 35.0, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 50.0, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         },
         'chrF++': {
-            'low': {'threshold': 0.3, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 0.5, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 35.0, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 50.0, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         },
         'Meteor': {
-            'low': {'threshold': 0.3, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 0.5, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 40.0, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 55.0, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         },
         'Comet-wmt22': {
-            'low': {'threshold': 0.2, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 0.4, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 75.0, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 87.0, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         },
         'XComet-XXL': {
-            'low': {'threshold': 0.2, 'color': '#ffc0c0'},  # pastel red
-            'medium': {'threshold': 0.4, 'color': '#ffe0b3'},  # pastel orange
+            'low': {'threshold': 80.0, 'color': '#ffc0c0'},  # pastel red
+            'medium': {'threshold': 90.0, 'color': '#ffe0b3'},  # pastel orange
             'high': {'color': '#d0f0c0'}  # pastel green
         }
     }
@@ -479,8 +479,8 @@ def build_app():
             df_for_stats = df_for_stats.apply(pd.to_numeric, errors='coerce')
             
             # Calculate mean and std for each row
-            df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(4)
-            df['Std'] = df_for_stats.std(axis=1, skipna=True).round(4)
+            df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(2)
+            df['Std'] = df_for_stats.std(axis=1, skipna=True).round(2)
             
             # Apply sorting if a column is specified and it exists in the dataframe
             if sort_by_col and sort_by_col != "None" and sort_by_col in df.columns:

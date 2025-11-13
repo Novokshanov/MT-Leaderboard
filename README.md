@@ -11,6 +11,8 @@ A Gradio-based web application for visualizing and analyzing machine translation
 - **Responsive Design**: Fixed first column for easy reference while scrolling horizontally
 - **Colorization**: Colorize scores according to customizable zones of quality
 
+\* The idea behind colorization: red is rather random characters than translation, yellow is translation, green is good translation. Mind that defaults are set according to personal intuition and experience with certain languages. Threshold values that are more suitable for objective research are welcome.
+
 ## Supported Metrics
 
 The application supports common machine translation evaluation metrics:
