@@ -476,7 +476,7 @@ def build_app():
             # Calculate mean and std for each row (across metric columns)
             # Convert to numeric first to handle any string values
             df_for_stats = df[metric_cols].copy()
-            df_for_stats = df_for_stats.apply(pd.to_numeric, errors='coerce')
+            df_for_stats = df_for_stats.apply(pd.to_numeric)
             
             # Calculate mean and std for each row
             df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(2)
@@ -487,7 +487,7 @@ def build_app():
                 ascending = sort_order_val == "Ascending"
                 try:
                     # Try to convert to numeric for proper sorting
-                    df[sort_by_col] = pd.to_numeric(df[sort_by_col], errors='ignore')
+                    df[sort_by_col] = pd.to_numeric(df[sort_by_col])
                     df = df.sort_values(by=sort_by_col, ascending=ascending)
                 except:
                     # If numeric conversion fails, sort as string
