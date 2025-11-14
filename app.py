@@ -77,13 +77,10 @@ def normalize_language_codes_in_directory(directory_path, lang_dict):
                 else:
                     return round(score, 2)
             
-            def round_score(score):
-                return round(score, 2)
-            
             df['Direction'] = df['Direction'].apply(normalize_direction)
             df['BLEU'] = df['BLEU'].apply(normalize_score)
-            df['chrF'] = df['chrF'].apply(round_score)
-            df['chrF++'] = df['chrF++'].apply(round_score)
+            df['chrF'] = df['chrF'].apply(normalize_score)
+            df['chrF++'] = df['chrF++'].apply(normalize_score)
             df['Meteor'] = df['Meteor'].apply(normalize_score)
             df['Comet-wmt22'] = df['Comet-wmt22'].apply(normalize_score)
             df['XComet-XXL'] = df['XComet-XXL'].apply(normalize_score)
