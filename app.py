@@ -394,34 +394,57 @@ def build_app():
         # State to track colorization status
         colorize_state = gr.State(value=False)
         
-        def update_all_dropdowns(benchmark_dir):
-            # Update all dropdowns when a benchmark is selected
+        def update_all_dropdowns(benchmark_dir, current_directions, current_models):
+            if not benchmark_dir or not os.path.exists(benchmark_dir):
+                return [
+                    gr.Dropdown(choices=[], value=None),
+                    gr.Dropdown(choices=[], value=[]),
+                    gr.Dropdown(choices=[], value=[])
+                ]
+            
             metrics = get_available_metrics(benchmark_dir)
-            directions = get_available_directions(benchmark_dir)
-            models = get_available_models(benchmark_dir)
+            all_directions = get_available_directions(benchmark_dir)
+            all_models = get_available_models(benchmark_dir)
+            
+            # Intersect current selections with new available options
+            valid_directions = [d for d in current_directions if d in all_directions] if current_directions else []
+            valid_models = [m for m in current_models if m in all_models] if current_models else []
             
             return [
-                gr.Dropdown(choices=metrics, value=None),
-                gr.Dropdown(choices=directions),
-                gr.Dropdown(choices=models)
+                gr.Dropdown(choices=metrics, value=None),  # metric reset on benchmark change
+                gr.Dropdown(choices=all_directions, value=valid_directions),
+                gr.Dropdown(choices=all_models, value=valid_models)
             ]
         
         def update_sort_options(benchmark_dir, metric, selected_directions, selected_models, transpose):
             if not benchmark_dir or not os.path.exists(benchmark_dir) or not metric:
-                return gr.Dropdown(choices=["None"])
+                return gr.Dropdown(choices=["None"], value="None")
             
-            # Create the current table (without statistics for this function)
-            current_table = create_results_table(benchmark_dir, metric, selected_directions, selected_models, transpose)
+            # Reuse the same logic as the display function, but without colorization
+            df = create_results_table(benchmark_dir, metric, selected_directions, selected_models, transpose)
             
-            if current_table.empty:
-                return gr.Dropdown(choices=["None"])
+            if df.empty:
+                return gr.Dropdown(choices=["None"], value="None")
             
-            # Get all columns from the current table (excluding the first identifier column)
-            identifier_col = current_table.columns[0]  # This will be 'Direction' or 'Model'
-            other_columns = [col for col in current_table.columns if col != identifier_col]
-            # Add the statistics columns that will be available after calculation
-            all_available_columns = other_columns + ['Mean', 'Std']
-            sort_options = ["None"] + all_available_columns  # Include all metric columns and statistics
+            # Get identifier column ('Direction' or 'Model')
+            identifier_col = df.columns[0]
+            metric_cols = [col for col in df.columns if col != identifier_col]
+            
+            # Convert to numeric for stats
+            df_for_stats = df[metric_cols].copy()
+            df_for_stats = df_for_stats.apply(pd.to_numeric, errors='coerce')
+            
+            # Only add Mean/Std if there's at least one valid numeric column
+            if not df_for_stats.empty and df_for_stats.count().sum() > 0:
+                df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(2)
+                df['Std'] = df_for_stats.std(axis=1, skipna=True).round(2)
+            else:
+                # If no valid data, don't add Mean/Std
+                pass
+            
+            # Now get all available columns (including Mean/Std if added)
+            all_columns = [col for col in df.columns if col != identifier_col]
+            sort_options = ["None"] + all_columns
             
             return gr.Dropdown(choices=sort_options, value="None")
         
@@ -450,19 +473,14 @@ def build_app():
             if df.empty:
                 return df
             
-            # Get the identifier column ('Direction' or 'Model')
+            # Compute Mean and Std
             identifier_col = df.columns[0]
-            # Get all metric columns (everything except the identifier)
             metric_cols = [col for col in df.columns if col != identifier_col]
             
-            # Calculate mean and std for each row (across metric columns)
-            # Convert to numeric first to handle any string values
-            df_for_stats = df[metric_cols].copy()
-            df_for_stats = df_for_stats.apply(pd.to_numeric)
-            
-            # Calculate mean and std for each row
-            df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(2)
-            df['Std'] = df_for_stats.std(axis=1, skipna=True).round(2)
+            if metric_cols:
+                df_for_stats = df[metric_cols].apply(pd.to_numeric, errors='coerce')
+                df['Mean'] = df_for_stats.mean(axis=1, skipna=True).round(2)
+                df['Std'] = df_for_stats.std(axis=1, skipna=True).round(2)
             
             # Apply sorting if a column is specified and it exists in the dataframe
             if sort_by_col and sort_by_col != "None" and sort_by_col in df.columns:
@@ -480,7 +498,7 @@ def build_app():
                 # Create a styled version of the dataframe
                 styled_df = df.copy()
                 # Colorize all metric columns and Mean, but not Std
-                for col in metric_cols + ['Mean']:  
+                for col in metric_cols + ['Mean']:
                     if col in styled_df.columns:
                         styled_df[col] = styled_df[col].apply(
                             lambda x: f'<span style="background-color: {get_score_color(x, col, metric)}; padding: 2px 4px; border-radius: 3px;">{x}</span>' 
@@ -507,7 +525,7 @@ def build_app():
         
         benchmark_dropdown.change(
             fn=update_all_dropdowns,
-            inputs=benchmark_dropdown,
+            inputs=[benchmark_dropdown, direction_multiselect, model_multiselect],
             outputs=[metric_dropdown, direction_multiselect, model_multiselect]
         )
 
